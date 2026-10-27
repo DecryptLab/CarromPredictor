@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://android.com"
+    package="com.predictor">
+
+    <!-- Permissions required for drawing trajectories over the screen and reading RAM -->
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+
+    <application
+        android:allowBackup="true"
+        android:label="Carrom Predictor Pro"
+        android:theme="@android:style/Theme.DeviceDefault.NoActionBar">
+        
+        <!-- The app launcher activity -->
+        <activity
+            android:name=".MainActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.action.CATEGORY_LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!-- The service responsible for reading data and drawing lines -->
+        <service 
+            android:name=".OverlayService"
+            android:enabled="true"
+            android:exported="false" />
+
+        <!-- Sandbox Process Slots: Pre-allocated so Android maps them in shared system RAM -->
+        <activity android:name="com.predictor.ProxyActivity$P0" android:process=":p0" android:theme="@android:style/Theme.NoTitleBar.Fullscreen" android:launchMode="standard" android:exported="false"/>
+        <activity android:name="com.predictor.ProxyActivity$P1" android:process=":p1" android:theme="@android:style/Theme.NoTitleBar.Fullscreen" android:launchMode="standard" android:exported="false"/>
+        <activity android:name="com.predictor.ProxyActivity$P2" android:process=":p2" android:theme="@android:style/Theme.NoTitleBar.Fullscreen" android:launchMode="standard" android:exported="false"/>
+        <activity android:name="com.predictor.ProxyActivity$P3" android:process=":p3" android:theme="@android:style/Theme.NoTitleBar.Fullscreen" android:launchMode="standard" android:exported="false"/>
+        <activity android:name="com.predictor.ProxyActivity$P4" android:process=":p4" android:theme="@android:style/Theme.NoTitleBar.Fullscreen" android:launchMode="standard" android:exported="false"/>
+
+        <!-- Core daemon service to manage virtualized APK routing tables -->
+        <service
+            android:name="com.predictor.DaemonService"
+            android:process=":daemon"
+            android:exported="false" />
+
+    </application>
+</manifest>
