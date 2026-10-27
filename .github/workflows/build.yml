@@ -23,7 +23,7 @@ jobs:
 
     - name: Download Open-Source BlackBox Core
       run: |
-        git clone https://github.com blackbox_core
+        git clone https://github.com/ALEX5402/NewBlackbox
 
     - name: Merge Un-Gated Custom Files into Framework
       run: |
