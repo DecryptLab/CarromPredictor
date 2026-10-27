@@ -1,4 +1,4 @@
-name: Build Native Engine Module
+name: Generate Complete Container APK
 
 on:
   push:
@@ -6,25 +6,46 @@ on:
   workflow_dispatch:
 
 jobs:
-  build_native:
+  build_container_apk:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout Source Code
+    - name: Checkout Your Custom Code
       uses: actions/checkout@v4
-
-    - name: Setup Android NDK Environment
-      uses: android-actions/setup-android@v3
       with:
-        ndk-version: '25.2.9519653'
+        path: custom_src
 
-    - name: Execute Android Clang Compiler Matrix
+    - name: Set up Java JDK Environment
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+
+    - name: Download Open-Source BlackBox Core
       run: |
-        cd jni
-        ndk-build NDK_PROJECT_PATH=. APP_BUILD_SCRIPT=Android.mk APP_ABI=arm64-v8a
+        git clone https://github.com blackbox_core
 
-    - name: Archive Compiled Native Library
+    - name: Merge Un-Gated Custom Files into Framework
+      run: |
+        # Override the manifest with our multi-process slot definitions
+        cp custom_src/AndroidManifest.xml blackbox_core/app/src/main/AndroidManifest.xml
+        
+        # Inject our bypass MainActivity and Overlay Canvas
+        mkdir -p blackbox_core/app/src/main/java/com/predictor
+        cp custom_src/java/com/predictor/*.java blackbox_core/app/src/main/java/com/predictor/
+        
+        # Merge our native memory pointer loop files into the NDK workspace
+        mkdir -p blackbox_core/app/src/main/jni
+        cp custom_src/jni/* blackbox_core/app/src/main/jni/
+
+    - name: Build Standalone Un-Gated APK Package
+      run: |
+        cd blackbox_core
+        chmod +x gradlew
+        ./gradlew assembleRelease --no-daemon
+
+    - name: Upload Completed APK Installation Artifact
       uses: actions/upload-artifact@v4
       with:
-        name: compiled-skia-ext-binary
-        path: libs/arm64-v8a/libskia_ext.so
+        name: carrom-predictor-pro
+        path: blackbox_core/app/build/outputs/apk/release/*.apk
