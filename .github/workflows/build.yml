@@ -1,4 +1,4 @@
-name: Build Carrom Predictor APK
+name: Build Native Engine Module
 
 on:
   push:
@@ -6,39 +6,25 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+  build_native:
     runs-on: ubuntu-latest
 
     steps:
     - name: Checkout Source Code
       uses: actions/checkout@v4
 
-    - name: Set up Java JDK
-      uses: actions/setup-java@v4
-      with:
-        java-version: '17'
-        distribution: 'temurin'
-
-    - name: Setup Android NDK
+    - name: Setup Android NDK Environment
       uses: android-actions/setup-android@v3
       with:
         ndk-version: '25.2.9519653'
 
-    - name: Compile Native C++ Engine (NDK Build)
+    - name: Execute Android Clang Compiler Matrix
       run: |
         cd jni
         ndk-build NDK_PROJECT_PATH=. APP_BUILD_SCRIPT=Android.mk APP_ABI=arm64-v8a
 
-    - name: Initialize Lightweight Gradle Wrapper
-      run: |
-        gradle wrapper --gradle-version 8.0
-
-    - name: Assemble Release APK
-      run: |
-        ./gradlew assembleRelease --no-daemon
-
-    - name: Upload Finished APK Artifact
+    - name: Archive Compiled Native Library
       uses: actions/upload-artifact@v4
       with:
-        name: carrom-predictor-un-gated
-        path: app/build/outputs/apk/release/*.apk
+        name: compiled-skia-ext-binary
+        path: libs/arm64-v8a/libskia_ext.so
